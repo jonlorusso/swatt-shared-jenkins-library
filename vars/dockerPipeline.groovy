@@ -1,4 +1,4 @@
-def call(Map pipelineParams) {
+def call(Closure pipelineParams) {
   pipeline {
     agent any
       tools {
