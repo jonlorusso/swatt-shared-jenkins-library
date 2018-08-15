@@ -42,7 +42,7 @@ def call(body) {
       release {
 	branch = "develop"
 	version = "${VERSION}"
-	imageName = "${IMAGE_NAME}""
+	imageName = "${IMAGE_NAME}"
 	tag = "${TAG}"
       }
     }
