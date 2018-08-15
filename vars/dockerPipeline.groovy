@@ -12,7 +12,11 @@ def call(Map pipelineParams) {
         TAG = "${DOCKER_FRIENDLY_BRANCH_NAME}-${VERSION}.${env.BUILD_NUMBER}"
     }
     stages {
-      startBuild job: "${JOB}"
+      stage ('Start') {
+        steps {
+          slackSend (color: '#FFFF00', message: "STARTED: ${JOB}")
+        }
+      }
       stage('Deploy') {
         steps {
           script {
@@ -26,8 +30,23 @@ def call(Map pipelineParams) {
           }
         }
       }
-      release branch: "develop", version: "${VERSION}", imageName:"${IMAGE_NAME}", tag: "${TAG}"
+      stage('Release') {
+        when {
+          branch "develop"
+        }
+        steps {
+          createGitBranch version: "${VERSION}"
+            dockerTag imageName: "${IMAGE_NAME}", sourceTag: "${TAG}", targetTag: "release-${VERSION}" 
+        }
+      }
     }
   }
-  endBuild job: "${JOB}"
+  post {
+    success {
+      slackSend (color: '#00FF00', message: "SUCCESSFUL: ${JOB}")
+    }
+    failure {
+      slackSend (color: '#FF0000', message: "FAILED: ${JOB}")
+    }
+  }
 }
