@@ -40,13 +40,13 @@ def call(Closure pipelineParams) {
         }
       }
     }
-  }
-  post {
-    success {
-      slackSend (color: '#00FF00', message: "SUCCESSFUL: ${JOB}")
-    }
-    failure {
-      slackSend (color: '#FF0000', message: "FAILED: ${JOB}")
+    post {
+      success {
+        slackSend (color: '#00FF00', message: "SUCCESSFUL: ${JOB}")
+      }
+      failure {
+        slackSend (color: '#FF0000', message: "FAILED: ${JOB}")
+      }
     }
   }
 }
