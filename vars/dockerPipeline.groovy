@@ -12,9 +12,7 @@ def call(Map pipelineParams) {
         TAG = "${DOCKER_FRIENDLY_BRANCH_NAME}-${VERSION}.${env.BUILD_NUMBER}"
     }
     stages {
-      startBuild {
-        job = ${JOB}
-      }
+      startBuild job: "${JOB}"
       stage('Deploy') {
         steps {
           script {
@@ -28,15 +26,8 @@ def call(Map pipelineParams) {
           }
         }
       }
-      release {
-        branch = "develop"
-          version = "${VERSION}"
-          imageName = "${IMAGE_NAME}"
-          tag = "${TAG}"
-      }
+      release branch: "develop", version: "${VERSION}", imageName:"${IMAGE_NAME}", tag: "${TAG}"
     }
   }
-  endBuild {
-    job = ${JOB}
-  }
+  endBuild job: "${JOB}"
 }
