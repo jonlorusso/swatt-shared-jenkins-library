@@ -6,11 +6,10 @@ def call(params) {
   sh("echo ${gitCredentialsId}")
   GIT_CREDENTIALS = credentials('80610dce-f3b7-428e-b69f-956eb087225d')
   sh("echo got credentials")
-  sh("echo ${GIT_CREDENTIALS}")
   GIT_USERNAME = "${env.GIT_CREDENTIALS_USR}"
-  sh("echo ${GIT_USERNAME}")
+  sh("echo username: ${GIT_USERNAME}")
   GIT_PASSWORD = java.net.URLEncoder.encode("${env.GIT_CREDENTIALS_PSW}", "UTF-8")
-  sh("echo ${GIT_PASSWORD}")
+  sh("echo password: ${GIT_PASSWORD}")
 
   sh("git checkout -B ${params.branchName}")
 
