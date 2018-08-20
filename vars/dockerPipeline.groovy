@@ -3,7 +3,9 @@ def call(Map pipelineParams) {
 		agent any
 		environment {
 			JOB = "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-
+			GIT_CREDENTIALS = credentials('80610dce-f3b7-428e-b69f-956eb087225d')
+			GIT_USERNAME = "${env.GIT_CREDENTIALS_USR}"
+			GIT_PASSWORD = java.net.URLEncoder.encode("${env.GIT_CREDENTIALS_PSW}", "UTF-8")
 		}
 		stages {
 
@@ -38,7 +40,7 @@ def call(Map pipelineParams) {
 					branch 'develop' // FIXME switch to branch "release/*" ?
 				}
 				steps {
-					createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: pipelineParams.gitUsername, gitPassword: pipelineParams.gitPassword
+					createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
 					
 					script {
 						for (image in pipelineParams.images) {
