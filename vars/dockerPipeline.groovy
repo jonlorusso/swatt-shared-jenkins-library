@@ -38,7 +38,7 @@ def call(Map pipelineParams) {
 					branch 'develop' // FIXME switch to branch "release/*" ?
 				}
 				steps {
-					createGitBranch branchName: "release/${pipelineParams.version}"
+					createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: pipelineParams.gitUsername, gitPassword: pipelineParams.gitPassword
 					
 					script {
 						for (image in pipelineParams.images) {
