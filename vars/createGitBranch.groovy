@@ -10,6 +10,6 @@ def call(params) {
     	sh("echo ${urlEncodedPassword}")
     
 		sh("git checkout -B ${params.branchName}")
-  		sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${scmUrl} ${params.branchName}")
+  		sh("git push https://${GIT_USERNAME}:${urlEncodedPassword}@${scmUrl} ${params.branchName}")
 	}
 }
