@@ -1,6 +1,5 @@
 def call(Map params) {
-  REGISTRY = "docker.dev.ruvpfs.swatt.exchange"
-  
-  sh "docker tag ${REGISTRY}/${params.imageName}:${params.sourceTag} ${REGISTRY}/${params.imageName}:${params.targetTag}"
-  sh "docker push ${REGISTRY}/${params.imageName}:${params.targetTag}
+  registry = params.registry ? params.registry : "docker.dev.ruvpfs.swatt.exchange"
+  sh "docker tag ${registry}/${params.imageName}:${params.sourceTag} ${registry}/${params.imageName}:${params.targetTag}"
+  dockerPush(params)
 }

@@ -1,52 +1,61 @@
 def call(Closure pipelineParams) {
-  pipeline {
-    agent any
-      tools {
-        maven 'maven3'
-      }
-    environment {
-      JOB = "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-        VERSION = readMavenPom().getVersion().replace("-SNAPSHOT", "")
-        IMAGE_NAME = readMavenPom().getArtifactId()
-        DOCKER_FRIENDLY_BRANCH_NAME = makeDockerTag("${env.BRANCH_NAME}")
-        TAG = "${DOCKER_FRIENDLY_BRANCH_NAME}-${VERSION}.${env.BUILD_NUMBER}"
-    }
-    stages {
-      stage ('Start') {
-        steps {
-          slackSend (color: '#FFFF00', message: "STARTED: ${JOB}")
-        }
-      }
-      stage('Deploy') {
-        steps {
-          script {
-            sh "mvn clean deploy -DskipTests -Ddockerfile.tag=${TAG} --activate-profiles docker"
+	pipeline {
+		agent any
+		environment {
+			JOB = "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
 
-              // Spotify Docker plugin:
-              // mvn package -> .jar
-              // mvn deploy -> artifactory
-              // docker build -t NAME .
-              // docker push NAME
-          }
-        }
-      }
-      stage('Release') {
-        when {
-          branch "develop"
-        }
-        steps {
-          createGitBranch version: "${VERSION}"
-            dockerTag imageName: "${IMAGE_NAME}", sourceTag: "${TAG}", targetTag: "release-${VERSION}" 
-        }
-      }
-    }
-    post {
-      success {
-        slackSend (color: '#00FF00', message: "SUCCESSFUL: ${JOB}")
-      }
-      failure {
-        slackSend (color: '#FF0000', message: "FAILED: ${JOB}")
-      }
-    }
-  }
+		}
+		stages {
+
+			stage ('Start') {
+				steps {
+					slackSend (color: '#FFFF00', message: "STARTED: ${JOB}")
+				}
+			}
+			
+			stage('Build') {
+				steps {
+					script {
+						for (image in pipelineParams.images) {
+							dockerBuild dockerfile: image.dockerfile, imageName: image.imageName, tag: image.tag
+						}
+					}
+				}
+			}
+
+			stage('Deploy') {
+				steps {
+					script {
+						for (image in pipelineParams.images) {
+							dockerPush imageName: image.imageName, tag: image.tag
+						}
+					}
+				}
+			}
+
+			stage('Release') {
+				when {
+					branch 'develop' // FIXME switch to branch "release/*" ?
+				}
+				steps {
+					createGitBranch branchName: "release/${pipelineParams.version}"
+					
+					script {
+						for (image in pipelineParams.images) {
+							dockerTag imageName: image.imageName, sourceTag: image.tag, targetTag: image.releaseTag
+						}
+					}
+				}
+			}
+			
+		}
+		post {
+			success {
+				slackSend (color: '#00FF00', message: "SUCCESSFUL: ${JOB}")
+			}
+			failure {
+				slackSend (color: '#FF0000', message: "FAILED: ${JOB}")
+			}
+		}
+	}
 }
