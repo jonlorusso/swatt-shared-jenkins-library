@@ -4,7 +4,7 @@ def call(params) {
   
   sh("echo ${scmUrl}")
   sh("echo ${gitCredentialsId}")
-  GIT_CREDENTIALS = credentials(gitCredentialsId)
+  GIT_CREDENTIALS = credentials gitCredentialsId
   sh("echo ${GIT_CREDENTIALS}")
   GIT_USERNAME = "${env.GIT_CREDENTIALS_USR}"
   sh("echo ${GIT_USERNAME}")
