@@ -1,44 +1,59 @@
-def call(Closure pipelineParams) {
+def call(Map pipelineParams) {
   pipeline {
     agent any
-      tools {
-        maven 'maven3'
+      environment {
+        JOB = "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+          GIT_CREDENTIALS = credentials('80610dce-f3b7-428e-b69f-956eb087225d')
+          GIT_USERNAME = "${env.GIT_CREDENTIALS_USR}"
+          GIT_PASSWORD = java.net.URLEncoder.encode("${env.GIT_CREDENTIALS_PSW}", "UTF-8")
       }
-    environment {
-      JOB = "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-        VERSION = readMavenPom().getVersion().replace("-SNAPSHOT", "")
-        IMAGE_NAME = readMavenPom().getArtifactId()
-        DOCKER_FRIENDLY_BRANCH_NAME = makeDockerTag("${env.BRANCH_NAME}")
-        TAG = "${DOCKER_FRIENDLY_BRANCH_NAME}-${VERSION}.${env.BUILD_NUMBER}"
-    }
     stages {
+
       stage ('Start') {
         steps {
           slackSend (color: '#FFFF00', message: "STARTED: ${JOB}")
         }
       }
-      stage('Deploy') {
+
+      stage('Build Image') {
         steps {
           script {
-            sh "mvn clean deploy -DskipTests -Ddockerfile.tag=${TAG} --activate-profiles docker"
-
-              // Spotify Docker plugin:
-              // mvn package -> .jar
-              // mvn deploy -> artifactory
-              // docker build -t NAME .
-              // docker push NAME
+            for (image in pipelineParams.images) {
+              dockerBuild dockerfile: image.dockerfile, imageName: image.name, tag: image.tag
+            }
           }
         }
       }
-      stage('Release') {
-        when {
-          branch "develop"
-        }
+
+      // test??
+
+      // since portal has a dedicated staging Dockerfile,
+      // we expect the staging tag to be passed in from the outside.
+      stage('Push Image(s)') {
         steps {
-          createGitBranch version: "${VERSION}"
-            dockerTag imageName: "${IMAGE_NAME}", sourceTag: "${TAG}", targetTag: "release-${VERSION}" 
+          script {
+            for (image in pipelineParams.images) {
+              dockerPush imageName: image.name, tag: image.tag
+            }
+          }
         }
       }
+
+      stage('Release') {
+        when {
+          branch 'develop' // FIXME switch to branch "release/*" ?
+        }
+        steps {
+          createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
+
+            script {
+              for (image in pipelineParams.images) {
+                dockerTag imageName: image.name, sourceTag: image.tag, targetTag: image.releaseTag
+              }
+            }
+        }
+      }
+
     }
     post {
       success {
