@@ -9,47 +9,47 @@ def call(Closure pipelineParams) {
         VERSION = readMavenPom().getVersion().replace("-SNAPSHOT", "")
     }
     stages {
-    
-  		stage ('Start') {
-			steps {
-				slackSend (color: '#FFFF00', message: "STARTED: ${JOB}")
-			}
-		}
 
-		stage('Build') {
-			steps {
-				sh "mvn clean package -DskipTests"
-			}
-			post {
-          		always {
-              		junit(allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml')
-          		}
-      		}
-		}
+      stage ('Start') {
+        steps {
+          slackSend (color: '#FFFF00', message: "STARTED: ${JOB}")
+        }
+      }
 
-		stage('Deploy') {
-		    when {
-          		branch 'develop'
-      		}
-			steps {
-				sh "mvn clean deploy -DskipTests"
-			}
-			post {
-          		always {
-              		junit(allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml')
-          		}
-      		}
-		}
+      stage('Build') {
+        steps {
+          sh "mvn clean package -DskipTests"
+        }
+        post {
+          always {
+            junit(allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml')
+          }
+        }
+      }
 
-		stage('Release') {
-			when { 
-				branch "develop"  // FIXME switch to branch "release/*" ?
-			}
-			steps {
-				createGitBranch branchName: "release/${VERSION}"
-			}
-		}
-			
+      stage('Deploy') {
+        when {
+          branch 'develop'
+        }
+        steps {
+          sh "mvn clean deploy -DskipTests"
+        }
+        post {
+          always {
+            junit(allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml')
+          }
+        }
+      }
+
+      stage('Release') {
+        when { 
+          branch "develop"  // FIXME switch to branch "release/*" ?
+        }
+        steps {
+          createGitBranch branchName: "release/${VERSION}"
+        }
+      }
+
     }
     post {
       success {
