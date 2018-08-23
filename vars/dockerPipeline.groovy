@@ -19,7 +19,7 @@ def call(Map pipelineParams) {
         steps {
           script {
             for (image in pipelineParams.images) {
-              dockerBuild dockerfile: image.dockerfile, imageName: image.name, tag: image.tag
+              dockerBuild buildArgs: pipelineParams.buildArgs, dockerfile: image.dockerfile, imageName: image.name, tag: image.tag
             }
           }
         }
