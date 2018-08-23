@@ -1,4 +1,4 @@
-def call(Closure pipelineParams) {
+def call(Map pipelineParams) {
   pipeline {
     agent any
       tools { maven 'maven3' }
@@ -57,7 +57,7 @@ def call(Closure pipelineParams) {
         when { branch "develop"  // FIXME switch to branch "release/*" ?
         }
         steps {
-          createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
+          createGitBranch branchName: "release/${VERSION}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
             dockerTag imageName: IMAGE_NAME, sourceTag: TAG, targetTag: "release-${VERSION}"
         }
       }
