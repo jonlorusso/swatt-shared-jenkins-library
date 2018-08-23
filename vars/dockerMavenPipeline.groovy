@@ -8,6 +8,10 @@ def call(Closure pipelineParams) {
         IMAGE_NAME = readMavenPom().getArtifactId()
         DOCKER_FRIENDLY_BRANCH_NAME = makeDockerTag("${env.BRANCH_NAME}")
         TAG = "${DOCKER_FRIENDLY_BRANCH_NAME}-${VERSION}.${env.BUILD_NUMBER}"
+      
+		GIT_CREDENTIALS = credentials('80610dce-f3b7-428e-b69f-956eb087225d')
+		GIT_USERNAME = "${env.GIT_CREDENTIALS_USR}"
+		GIT_PASSWORD = java.net.URLEncoder.encode("${env.GIT_CREDENTIALS_PSW}", "UTF-8")
     }
     stages {
 
@@ -53,7 +57,7 @@ def call(Closure pipelineParams) {
         when { branch "develop"  // FIXME switch to branch "release/*" ?
         }
         steps {
-          createGitBranch branchName: "release/${VERSION}"
+          createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
             dockerTag imageName: IMAGE_NAME, sourceTag: TAG, targetTag: "release-${VERSION}"
         }
       }
