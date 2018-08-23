@@ -1,5 +1,3 @@
-@Library('SwattJenkins') _
-
 def call(Closure pipelineParams) {
   pipeline {
     agent any
