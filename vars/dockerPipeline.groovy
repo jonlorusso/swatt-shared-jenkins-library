@@ -3,7 +3,7 @@ def call(Map pipelineParams) {
     agent any
       environment {
         JOB = "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-          GIT_CREDENTIALS = credentials('80610dce-f3b7-428e-b69f-956eb087225d')
+          GIT_CREDENTIALS = credentials('bitbucket-jenkins')
           GIT_USERNAME = "${env.GIT_CREDENTIALS_USR}"
           GIT_PASSWORD = java.net.URLEncoder.encode("${env.GIT_CREDENTIALS_PSW}", "UTF-8")
       }
