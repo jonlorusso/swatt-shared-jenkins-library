@@ -1,4 +1,4 @@
-def call(Closure pipelineParams) {
+def call(Map pipelineParams) {
   pipeline {
     agent any
       tools {
@@ -7,6 +7,9 @@ def call(Closure pipelineParams) {
     environment {
       JOB = "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
         VERSION = readMavenPom().getVersion().replace("-SNAPSHOT", "")
+		GIT_CREDENTIALS = credentials('80610dce-f3b7-428e-b69f-956eb087225d')
+		GIT_USERNAME = "${env.GIT_CREDENTIALS_USR}"
+		GIT_PASSWORD = java.net.URLEncoder.encode("${env.GIT_CREDENTIALS_PSW}", "UTF-8")      
     }
     stages {
 
@@ -46,7 +49,7 @@ def call(Closure pipelineParams) {
           branch "develop"  // FIXME switch to branch "release/*" ?
         }
         steps {
-          createGitBranch branchName: "release/${VERSION}"
+          createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
         }
       }
 
