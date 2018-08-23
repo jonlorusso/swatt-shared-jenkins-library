@@ -34,7 +34,7 @@ def call(Map pipelineParams) {
 
       stage('Build Image') {
         steps {
-          dockerBuild imageName: IMAGE_NAME, tag: TAG
+          dockerBuild buildArgs: [ JAR_FILE: "${IMAGE_NAME}-${VERSION}.jar" ], imageName: IMAGE_NAME, tag: TAG
         }
       }
 
