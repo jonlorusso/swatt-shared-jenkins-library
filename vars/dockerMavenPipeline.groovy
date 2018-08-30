@@ -23,7 +23,7 @@ def call(Map pipelineParams) {
 
       stage('Build Jar') {
         steps {
-          sh "mvn clean package -DskipTests"
+          sh "mvn -U clean package -DskipTests"
         }
         post {
           always {
