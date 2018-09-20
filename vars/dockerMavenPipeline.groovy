@@ -49,7 +49,7 @@ def call(Map pipelineParams) {
           branch 'develop' // FIXME switch to branch "release/*" ?
         }
         steps {
-          sh "mvn deploy"
+          sh "mvn -DskipTests deploy"
           dockerTag imageName: IMAGE_NAME, sourceTag: TAG, targetTag: 'staging'
         }
       }
