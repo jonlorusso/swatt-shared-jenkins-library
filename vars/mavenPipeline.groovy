@@ -44,14 +44,14 @@ def call(Map pipelineParams) {
         }
       }
 
-      stage('Release') {
-        when { 
-          branch "develop"  // FIXME switch to branch "release/*" ?
-        }
-        steps {
-          createGitBranch branchName: "release/${VERSION}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
-        }
-      }
+      // stage('Release') {
+      //   when { 
+      //     branch "develop"  // FIXME switch to branch "release/*" ?
+      //   }
+      //   steps {
+      //     createGitBranch branchName: "release/${VERSION}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
+      //   }
+      // }
 
     }
     post {

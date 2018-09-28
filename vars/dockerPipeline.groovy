@@ -30,6 +30,9 @@ def call(Map pipelineParams) {
       // since portal has a dedicated staging Dockerfile,
       // we expect the staging tag to be passed in from the outside.
       stage('Push Image(s)') {
+        when {
+          branch 'develop'
+        }
         steps {
           script {
             for (image in pipelineParams.images) {
@@ -44,7 +47,7 @@ def call(Map pipelineParams) {
           branch 'develop' // FIXME switch to branch "release/*" ?
         }
         steps {
-          createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
+//          createGitBranch branchName: "release/${pipelineParams.version}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
 
             script {
               for (image in pipelineParams.images) {

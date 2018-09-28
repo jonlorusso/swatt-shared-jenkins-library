@@ -39,6 +39,9 @@ def call(Map pipelineParams) {
       }
 
       stage('Push Image') {
+        when {
+          branch 'develop'
+        }
         steps {
           dockerPush imageName: IMAGE_NAME, tag: TAG
         }
@@ -58,7 +61,7 @@ def call(Map pipelineParams) {
         when { branch "develop"  // FIXME switch to branch "release/*" ?
         }
         steps {
-          createGitBranch branchName: "release/${VERSION}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
+//          createGitBranch branchName: "release/${VERSION}", gitUsername: GIT_USERNAME, gitPassword: GIT_PASSWORD
             dockerTag imageName: IMAGE_NAME, sourceTag: TAG, targetTag: "release-${VERSION}"
         }
       }
